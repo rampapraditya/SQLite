@@ -2,14 +2,20 @@ package com.pramedia.sqlite;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btnBaca, btnSimpan;
+    private EditText nim, nama, prodi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +25,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnBaca = findViewById(R.id.btnBaca);
         btnBaca.setOnClickListener(this);
 
+        nim = findViewById(R.id.nim);
+        nama = findViewById(R.id.nama);
+        prodi = findViewById(R.id.prodi);
+
         btnSimpan = findViewById(R.id.btnSimpan);
         btnSimpan.setOnClickListener(this);
     }
@@ -27,9 +37,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         if(view == btnBaca){
             baca();
+
         }else if(view == btnSimpan){
-            simpan("01", "Rampa", "Sistem Informasi");
-            simpan("02", "Praditya", "Informatika");
+            String a = nim.getText().toString();
+            String b = nama.getText().toString();
+            String c = prodi.getText().toString();
+
+            simpan(a, b, c);
         }
     }
 
@@ -43,7 +57,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void simpan(String nim, String nama, String prodi){
-        DBHelper db = new DBHelper(this);
-        db.dml("insert into mahasiswa values ('" + nim + "','" + nama + "','" + prodi + "');");
+        try {
+            DBHelper db = new DBHelper(this);
+
+            int cek = Integer.parseInt(db.cari("select count(*) as jml from mahasiswa where nim = '" + nim + "';"));
+            if( cek > 0){
+                Toast.makeText(this, "Gunakan NIM lain", Toast.LENGTH_SHORT).show();
+            }else{
+                db.dml("insert into mahasiswa values ('" + nim + "','" + nama + "','" + prodi + "');");
+            }
+        }catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
